@@ -22,3 +22,6 @@ flutter run -d web-server --web-hostname 127.0.0.1 --web-port 8080
 ```
 
 Open the URL printed by Flutter in a browser. You can also use `flutter run -d chrome` if Chrome starts correctly on your system.
+
+## Video Demo
+[Screencast from 2026-11-13 03-38-47.webm](https://github.com/user-attachments/assets/65145718-bb07-4aea-b11d-baeda4864906)
