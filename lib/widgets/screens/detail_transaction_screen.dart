@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../../utils/app_color.dart';
 import '../custom_dialog.dart';
 import '../custom_input.dart';
@@ -14,8 +15,8 @@ class DetailTransactionScreen extends StatelessWidget {
   Future<void> deleteTransaction(BuildContext context) async {
     CustomDialog.showConfirmation(
       context: context,
-      title: "Hapus Transaksi",
-      message: "Apakah Anda yakin ingin menghapus catatan transaksi ini?",
+      title: "Delete transaction",
+      message: "Are you sure you want to delete this transaction?",
       onConfirm: () async {
         try {
           String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -27,7 +28,10 @@ class DetailTransactionScreen extends StatelessWidget {
               .delete();
 
           if (context.mounted) {
-            CustomSnackBar.showSuccess(context, "Transaksi berhasil dihapus");
+            CustomSnackBar.showSuccess(
+              context,
+              "Transaction deleted successfully.",
+            );
             Navigator.pop(context);
           }
         } catch (e) {
@@ -43,12 +47,14 @@ class DetailTransactionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleC = TextEditingController(text: trxData['title']);
     final amountC = TextEditingController(text: trxData['amount'].toString());
-    final typeC = TextEditingController(text: trxData['type']);
+    final typeC = TextEditingController(
+      text: trxData['type'] == 'Pemasukan' ? 'Income' : 'Expense',
+    );
     final dateC = TextEditingController(text: trxData['created_at']);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detail Transaksi"),
+        title: const Text("Transaction details"),
         backgroundColor: Colors.white,
         foregroundColor: AppColor.secondary,
         elevation: 0,
@@ -71,25 +77,25 @@ class DetailTransactionScreen extends StatelessWidget {
         children: [
           CustomInput(
             controller: titleC,
-            label: "Judul / Catatan Transaksi",
+            label: "Title / note",
             hint: "",
             disabled: true,
           ),
           CustomInput(
             controller: amountC,
-            label: "Nominal Angka (Rp)",
+            label: "Amount (IDR)",
             hint: "",
             disabled: true,
           ),
           CustomInput(
             controller: typeC,
-            label: "Tipe Transaksi",
+            label: "Transaction type",
             hint: "",
             disabled: true,
           ),
           CustomInput(
             controller: dateC,
-            label: "Waktu Tercatat",
+            label: "Recorded at",
             hint: "",
             disabled: true,
           ),
@@ -106,7 +112,7 @@ class DetailTransactionScreen extends StatelessWidget {
               ),
               onPressed: () => deleteTransaction(context),
               child: const Text(
-                "Hapus Transaksi",
+                "Delete transaction",
                 style: TextStyle(color: Colors.white),
               ),
             ),

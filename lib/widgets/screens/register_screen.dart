@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../../utils/app_color.dart';
 import '../custom_input.dart';
 import '../custom_snackbar.dart';
@@ -25,14 +26,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Semua form wajib diisi');
+        CustomSnackBar.showError(context, 'Please complete all fields.');
       }
       return;
     }
 
     if (password.length < 6) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Password minimal 6 karakter');
+        CustomSnackBar.showError(
+          context,
+          'Password must be at least 6 characters.',
+        );
       }
       return;
     }
@@ -46,22 +50,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
-        'name': name,
-        'email': email,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+            'name': name,
+            'email': email,
+            'created_at': DateTime.now().toIso8601String(),
+          });
 
       if (mounted) {
-        CustomSnackBar.showSuccess(context, 'Akun berhasil dibuat');
+        CustomSnackBar.showSuccess(context, 'Account created successfully.');
         Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, e.message ?? 'Registrasi gagal');
+        final message = switch (e.code) {
+          'operation-not-allowed' => 'Email/password sign-up is disabled. Enable it in Firebase Console under Authentication > Sign-in method.',
+          'email-already-in-use' =>
+            'An account already exists for this email. Try signing in instead.',
+          'invalid-email' => 'Enter a valid email address.',
+          'weak-password' => 'Choose a stronger password.',
+          'network-request-failed' => 'Could not reach Firebase. Check your internet connection and try again.',
+          _ => e.message ?? 'Account creation failed.',
+        };
+        CustomSnackBar.showError(context, message);
+      }
+    } on FirebaseException catch (e) {
+      if (mounted) {
+        final message = e.code == 'permission-denied'
+            ? 'Your account was created, but the profile could not be saved. Check your Cloud Firestore security rules.'
+            : e.code == 'unavailable'
+            ? 'Your account was created, but Firestore is unavailable. Check your connection and Firebase Console.'
+            : 'Your account was created, but its profile could not be saved (${e.code}).';
+        CustomSnackBar.showError(context, message);
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Terjadi kesalahan: $e');
+        CustomSnackBar.showError(context, 'Something went wrong: $e');
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -79,12 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColor.secondary,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -92,21 +109,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 24),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryExtraSoft,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_rounded,
+                      size: 42,
+                      color: AppColor.primary,
+                    ),
+                  ),
                   CustomInput(
                     controller: nameC,
-                    label: 'Nama Lengkap',
-                    hint: 'Masukkan nama lengkap',
+                    label: 'Full name',
+                    hint: 'Enter your full name',
                   ),
                   CustomInput(
                     controller: emailC,
                     label: 'Email',
-                    hint: 'contoh@email.com',
+                    hint: 'you@example.com',
                     keyboardType: TextInputType.emailAddress,
                   ),
                   CustomInput(
                     controller: passwordC,
                     label: 'Password',
-                    hint: 'Minimal 6 karakter',
+                    hint: 'At least 6 characters',
                     obscureText: true,
                   ),
                   const SizedBox(height: 12),
@@ -117,14 +147,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: isLoading ? null : register,
                       child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                              'Buat Akun',
+                              'Create account',
                               style: TextStyle(color: Colors.white),
                             ),
                     ),

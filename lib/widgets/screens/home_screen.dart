@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../../utils/app_color.dart';
 import '../custom_dialog.dart';
 import 'add_transaction_screen.dart';
@@ -27,13 +28,19 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            // 1. Header: Stream Profil User & Tombol Logout
+            // Profile stream and sign-out action.
             StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection("users")
                   .doc(uid)
                   .snapshots(),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text(
+                    "Could not load your profile: ${snapshot.error}",
+                    style: const TextStyle(color: AppColor.error),
+                  );
+                }
                 if (!snapshot.hasData) return const SizedBox();
                 var userData = snapshot.data?.data();
                 String name = userData?['name'] ?? 'User';
@@ -45,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Selamat datang kembali,",
+                          "Welcome back,",
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColor.secondarySoft,
@@ -65,8 +72,8 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         CustomDialog.showConfirmation(
                           context: context,
-                          title: "Logout",
-                          message: "Apakah Anda yakin ingin keluar?",
+                          title: "Sign out",
+                          message: "Are you sure you want to sign out?",
                           onConfirm: () => FirebaseAuth.instance.signOut(),
                         );
                       },
@@ -77,7 +84,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // 2. Stream Statistik & Riwayat Transaksi Real-Time
+            // Live balance summary and transaction history.
             StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection("users")
@@ -86,6 +93,12 @@ class HomeScreen extends StatelessWidget {
                   .orderBy("created_at", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text(
+                    "Could not load transactions: ${snapshot.error}",
+                    style: const TextStyle(color: AppColor.error),
+                  );
+                }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -95,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                 int totalPemasukan = 0;
                 int totalPengeluaran = 0;
 
-                // Menghitung nominal pemasukan dan pengeluaran
+                // Calculate income and expenses from the user's transactions.
                 for (var doc in docs) {
                   var data = doc.data();
                   int amount = (data['amount'] ?? 0) as int;
@@ -110,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Card Statistik Total Transaksi
+                    // Balance summary card.
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
@@ -125,7 +138,7 @@ class HomeScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text(
-                                "Total Saldo",
+                                "Total balance",
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
@@ -141,7 +154,7 @@ class HomeScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  "$totalTransaksi Transaksi Tercatat",
+                                  "$totalTransaksi transactions",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -168,7 +181,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    "Pemasukan",
+                                    "Income",
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
@@ -187,7 +200,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   const Text(
-                                    "Pengeluaran",
+                                    "Expenses",
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
@@ -210,7 +223,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     const Text(
-                      "Riwayat Transaksi Terbaru",
+                      "Recent transactions",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -218,13 +231,11 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Daftar Riwayat Transaksi
+                    // Transaction history.
                     if (docs.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
-                        child: Center(
-                          child: Text("Belum ada catatan transaksi"),
-                        ),
+                        child: Center(child: Text("No transactions yet")),
                       )
                     else
                       ListView.separated(
@@ -263,7 +274,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             subtitle: Text(
-                              "${trx['type']} • ${trx['created_at'].toString().substring(0, 10)}",
+                              "${isIncome ? 'Income' : 'Expense'} • ${trx['created_at'].toString().substring(0, 10)}",
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: Text(
@@ -279,9 +290,8 @@ class HomeScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DetailTransactionScreen(
-                                    trxData: trx,
-                                  ),
+                                  builder: (context) =>
+                                      DetailTransactionScreen(trxData: trx),
                                 ),
                               );
                             },

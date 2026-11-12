@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Email dan password wajib diisi');
+        CustomSnackBar.showError(context, 'Please enter your email and password.');
       }
       return;
     }
@@ -36,11 +36,24 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } on FirebaseAuthException catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, e.message ?? 'Login gagal');
+        final message = switch (e.code) {
+          'operation-not-allowed' =>
+            'Email/password sign-in is disabled. Enable it in Firebase Console under Authentication > Sign-in method.',
+          'invalid-credential' || 'user-not-found' || 'wrong-password' =>
+            'Incorrect email or password. If you have not created an account yet, choose Create account.',
+          'invalid-email' => 'Enter a valid email address.',
+          'user-disabled' => 'This account has been disabled. Contact the project administrator.',
+          'too-many-requests' =>
+            'Too many attempts. Wait a little while and try again.',
+          'network-request-failed' =>
+            'Could not reach Firebase. Check your internet connection and try again.',
+          _ => e.message ?? 'Sign-in failed. Please try again.',
+        };
+        CustomSnackBar.showError(context, message);
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Terjadi kesalahan: $e');
+        CustomSnackBar.showError(context, 'Something went wrong: $e');
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -65,27 +78,43 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 72,
-                    color: AppColor.primary,
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryExtraSoft,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_rounded,
+                      size: 48,
+                      color: AppColor.primary,
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 14),
                   const Text(
-                    'Masuk',
+                    'Pocketwise',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColor.primarySoft,
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  const Text(
+                    'Welcome back',
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 24),
                   CustomInput(
                     controller: emailC,
                     label: 'Email',
-                    hint: 'contoh@email.com',
+                    hint: 'you@example.com',
                     keyboardType: TextInputType.emailAddress,
                   ),
                   CustomInput(
                     controller: passwordC,
                     label: 'Password',
-                    hint: 'Masukkan password',
+                    hint: 'Enter your password',
                     obscureText: true,
                   ),
                   const SizedBox(height: 10),
@@ -96,14 +125,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: isLoading ? null : login,
                       child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                              'Masuk',
+                              'Sign in',
                               style: TextStyle(color: Colors.white),
                             ),
                     ),
@@ -112,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Belum punya akun?'),
+                      const Text("Don't have an account?"),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -122,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           );
                         },
-                        child: const Text('Daftar'),
+                        child: const Text('Create account'),
                       ),
                     ],
                   ),

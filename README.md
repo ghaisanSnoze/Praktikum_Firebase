@@ -1,17 +1,24 @@
-# praktikum_firebase
+# Pocketwise
 
-A new Flutter project.
+A personal finance tracker built with Flutter, Firebase Authentication, and Cloud Firestore.
 
-## Getting Started
+## Firebase setup
 
-This project is a starting point for a Flutter application.
+The app is configured for Firebase project `praktikumfirebase-92b07`. Its default Cloud Firestore database is in Jakarta (`asia-southeast2`), and the security rules are maintained in [`firestore.rules`](./firestore.rules).
 
-A few resources to get you started if this is your first Flutter project:
+Before signing in, enable **Email/Password** under Firebase Console → Authentication → Sign-in method. New users should choose **Create account** first; registration creates a Firebase Authentication account and a profile document at `users/{uid}`. Transactions are stored under `users/{uid}/transactions`.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+If the Firestore rules change, deploy them with:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+firebase deploy --only firestore:rules --project praktikumfirebase-92b07
+```
+
+## Run the app
+
+```bash
+flutter pub get
+flutter run -d web-server --web-hostname 127.0.0.1 --web-port 8080
+```
+
+Open the URL printed by Flutter in a browser. You can also use `flutter run -d chrome` if Chrome starts correctly on your system.

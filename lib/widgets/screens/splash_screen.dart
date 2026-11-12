@@ -16,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Berpindah ke AuthGate setelah 2 detik
+    // Let the brand screen appear briefly before routing by auth state.
     Timer(const Duration(seconds: 2), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -36,14 +36,23 @@ class _SplashScreenState extends State<SplashScreen> {
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.account_balance_wallet_rounded,
-              size: 80,
-              color: Colors.white,
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Color(0x2EFFFFFF),
+                borderRadius: BorderRadius.all(Radius.circular(28)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(18),
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 58,
+                  color: Colors.white,
+                ),
+              ),
             ),
             SizedBox(height: 16),
             Text(
-              "Personal Finance Tracker",
+              "Pocketwise",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -52,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 8),
             Text(
-              "Kelola Keuanganmu Lebih Mudah",
+              "A clearer view of your money",
               style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
@@ -62,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// Memantau status login secara real-time seperti di main.dart modul
+// Routes users according to their current Firebase Authentication state.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 

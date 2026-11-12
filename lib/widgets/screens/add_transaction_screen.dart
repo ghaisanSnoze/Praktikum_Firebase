@@ -21,14 +21,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Future<void> addTransaction() async {
     if (titleC.text.isEmpty || amountC.text.isEmpty) {
-      if (mounted) CustomSnackBar.showError(context, "Semua form wajib diisi");
+      if (mounted) CustomSnackBar.showError(context, "Please complete all fields.");
       return;
     }
 
     int? parsedAmount = int.tryParse(amountC.text.trim());
     if (parsedAmount == null || parsedAmount <= 0) {
       if (mounted) {
-        CustomSnackBar.showError(context, "Nominal harus berupa angka yang valid");
+        CustomSnackBar.showError(context, "Enter a valid amount greater than zero.");
       }
       return;
     }
@@ -52,12 +52,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       });
 
       if (mounted) {
-        CustomSnackBar.showSuccess(context, "Berhasil menambahkan transaksi");
+        CustomSnackBar.showSuccess(context, "Transaction added successfully.");
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, e.toString());
+        CustomSnackBar.showError(context, "Could not save transaction: $e");
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -75,7 +75,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tambah Transaksi"),
+        title: const Text("Add transaction"),
         backgroundColor: Colors.white,
         foregroundColor: AppColor.secondary,
         elevation: 0,
@@ -85,16 +85,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         children: [
           CustomInput(
             controller: titleC,
-            label: "Judul / Catatan Transaksi",
-            hint: "Contoh: Gaji Bulanan / Beli Makan",
+            label: "Title / note",
+            hint: "e.g. Monthly salary / Lunch",
           ),
           CustomInput(
             controller: amountC,
-            label: "Nominal Angka (Rp)",
-            hint: "Contoh: 50000",
+            label: "Amount (IDR)",
+            hint: "e.g. 50000",
             keyboardType: TextInputType.number,
           ),
-          // Pilihan Tipe Transaksi (Pemasukan / Pengeluaran)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -111,11 +110,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 items: const [
                   DropdownMenuItem(
                     value: "Pemasukan",
-                    child: Text("Pemasukan"),
+                    child: Text("Income"),
                   ),
                   DropdownMenuItem(
                     value: "Pengeluaran",
-                    child: Text("Pengeluaran"),
+                    child: Text("Expense"),
                   ),
                 ],
                 onChanged: (val) {
@@ -141,7 +140,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                      "Simpan Transaksi",
+                      "Save transaction",
                       style: TextStyle(color: Colors.white),
                     ),
             ),

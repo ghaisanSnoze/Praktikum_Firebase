@@ -29,7 +29,7 @@ class CustomInput extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: disabled ? AppColor.primaryExtraSoft : Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(width: 1, color: AppColor.secondaryExtraSoft),
       ),
       child: TextField(

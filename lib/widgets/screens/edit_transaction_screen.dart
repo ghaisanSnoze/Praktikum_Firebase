@@ -29,14 +29,14 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
   Future<void> updateTransaction() async {
     if (titleC.text.isEmpty || amountC.text.isEmpty) {
-      if (mounted) CustomSnackBar.showError(context, "Semua form wajib diisi");
+      if (mounted) CustomSnackBar.showError(context, "Please complete all fields.");
       return;
     }
 
     int? parsedAmount = int.tryParse(amountC.text.trim());
     if (parsedAmount == null || parsedAmount <= 0) {
       if (mounted) {
-        CustomSnackBar.showError(context, "Nominal harus berupa angka yang valid");
+        CustomSnackBar.showError(context, "Enter a valid amount greater than zero.");
       }
       return;
     }
@@ -57,13 +57,13 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       });
 
       if (mounted) {
-        CustomSnackBar.showSuccess(context, "Berhasil memperbarui transaksi");
-        Navigator.pop(context); // Tutup halaman Edit
-        Navigator.pop(context); // Tutup halaman Detail agar kembali ke Home
+        CustomSnackBar.showSuccess(context, "Transaction updated successfully.");
+        Navigator.pop(context);
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, e.toString());
+        CustomSnackBar.showError(context, "Could not update transaction: $e");
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -81,7 +81,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Transaksi"),
+        title: const Text("Edit transaction"),
         backgroundColor: Colors.white,
         foregroundColor: AppColor.secondary,
         elevation: 0,
@@ -91,13 +91,13 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
         children: [
           CustomInput(
             controller: titleC,
-            label: "Judul / Catatan Transaksi",
-            hint: "Edit catatan transaksi",
+            label: "Title / note",
+            hint: "Edit transaction note",
           ),
           CustomInput(
             controller: amountC,
-            label: "Nominal Angka (Rp)",
-            hint: "Edit nominal",
+            label: "Amount (IDR)",
+            hint: "Edit amount",
             keyboardType: TextInputType.number,
           ),
           Container(
@@ -116,11 +116,11 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 items: const [
                   DropdownMenuItem(
                     value: "Pemasukan",
-                    child: Text("Pemasukan"),
+                    child: Text("Income"),
                   ),
                   DropdownMenuItem(
                     value: "Pengeluaran",
-                    child: Text("Pengeluaran"),
+                    child: Text("Expense"),
                   ),
                 ],
                 onChanged: (val) {
@@ -146,7 +146,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                      "Simpan Perubahan",
+                      "Save changes",
                       style: TextStyle(color: Colors.white),
                     ),
             ),

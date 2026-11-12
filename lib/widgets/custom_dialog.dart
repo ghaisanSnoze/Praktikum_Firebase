@@ -23,7 +23,7 @@ class CustomDialog {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Batal", style: TextStyle(color: AppColor.secondarySoft)),
+            child: const Text("Cancel", style: TextStyle(color: AppColor.secondarySoft)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColor.primary),
@@ -31,7 +31,7 @@ class CustomDialog {
               Navigator.pop(ctx);
               onConfirm();
             },
-            child: const Text("Ya", style: TextStyle(color: Colors.white)),
+            child: const Text("Confirm", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
